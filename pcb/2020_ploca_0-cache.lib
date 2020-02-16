@@ -1,0 +1,19 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#
+# nes
+#
+DEF nes U 0 40 Y Y 1 F N
+F0 "U" 0 0 60 H V C CNN
+F1 "nes" 0 0 60 H V C CNN
+F2 "" 0 0 60 H I C CNN
+F3 "" 0 0 60 H I C CNN
+DRAW
+S 3700 2850 4000 2250 0 1 0 N
+X nesto ~ 3500 2750 200 R 50 50 1 1 I
+X nr ~ 3500 2450 200 R 50 50 1 1 I
+X ~ ~ 3500 2300 200 R 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
+#End Library
