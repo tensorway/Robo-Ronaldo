@@ -89,7 +89,7 @@ def set_camera_modes(camera, res):
     #camera.framerate = 30
 
     time.sleep(1)
-    camera.iso = 150
+    camera.iso = 80
     t = camera.awb_gains
     camera.awb_mode = 'off'
     camera.awb_gains = t
@@ -128,14 +128,14 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
     balli = 1
     size_mode = 0
     last_size_mode = 1
-    xcen = 303
-    ycen = 231
+    xcen = 280
+    ycen = 210
     wrote = True
     t2 = time.time()
     
-    low1 = np.array([0, 120, 60], np.uint8)
-    low2 = np.array([170, 120, 60], np.uint8)
-    high1 = np.array([10, 255, 255], np.uint8)
+    low1 = np.array([0, 60, 60], np.uint8)
+    low2 = np.array([170, 70, 60], np.uint8)
+    high1 = np.array([35, 255, 255], np.uint8)
     high2 = np.array([180, 255, 255], np.uint8)
     
     if debug:
@@ -154,9 +154,9 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
         mask2 = cv2.inRange(hsv, low2, high2)
         mask = cv2.bitwise_or(mask1, mask2)
         mask = cv2.bitwise_and(mask, nnmask)
-        mask = cv2.erode(mask, np.ones((4, 4))/16)
-        mask = cv2.dilate(mask, np.ones((4, 4))/16)
-        res = cv2.bitwise_and(img,img,mask = mask)
+        mask = cv2.erode(mask, np.ones((3, 3))/9)
+        mask = cv2.dilate(mask, np.ones((7, 7))/9)
+        result = cv2.bitwise_and(img,img,mask = mask)
         
         if recnum.value >0.5:
             wrote = False
@@ -179,12 +179,12 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
                 (x,y),r = cv2.minEnclosingCircle(cnt)
                 center = (int(x),int(y))
                 radius = int(r)
-                if r < 4:
+                if r < 2:
                     continue
                 round_coeff = area/(r*r*3.14)
                 if round_coeff < 0.30:
                     continue
-                res = cv2.circle(res,center,radius,(0,255,0),2)
+                result = cv2.circle(result,center,radius,(0,255,0),2)
                 
                 
                 #area_coeff = area/500 if area<500 else 1
@@ -198,7 +198,7 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
                 M = cv2.moments(cnt)
                 xball = int(M['m10']/(M['m00']+0.001))
                 yball = int(M['m01']/(M['m00']+0.001))
-                res = draw_cross(res, xball, yball, 20, (0, 255, 0))
+                result = draw_cross(res, xball, yball, 20, (0, 255, 0))
                 reliable = max_size
                 ball_size = cv2.contourArea(cnt)  
                 ball_ret_size = ball_size
@@ -210,14 +210,10 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
         if debug:
 
             read_trackbars(low1, high1, low2, high2)
-            #cv2.imshow('low1', cv2.cvtColor(low1, cv2.COLOR_HSV2BGR))
-            #cv2.imshow('high1', cv2.cvtColor(high1, cv2.COLOR_HSV2BGR))
-            #cv2.imshow('low2', cv2.cvtColor(low2, cv2.COLOR_HSV2BGR))
-            #cv2.imshow('high2', cv2.cvtColor(high2, cv2.COLOR_HSV2BGR))
             cv2.imshow('nnmask', nnmask)
             cv2.imshow('img', img)
             cv2.imshow('mask', mask)
-            cv2.imshow('proc', res)
+            cv2.imshow('proc', result)
             print(time.time() - t2, angle, distance, end = '\r')
             t2 = time.time()
 
