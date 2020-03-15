@@ -135,8 +135,12 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
     
     low1 = np.array([0, 60, 60], np.uint8)
     low2 = np.array([170, 70, 60], np.uint8)
-    high1 = np.array([35, 255, 255], np.uint8)
+    low3 = np.array([23, 100, 60], np.uint8)
+    high1 = np.array([23, 255, 255], np.uint8)
     high2 = np.array([180, 255, 255], np.uint8)
+    high3 = np.array([42, 255, 255], np.uint8)
+    low_grass = np.array([35, 80, 60], np.uint8)
+    high_grass = np.array([100, 255, 255], np.uint8)
     
     if debug:
         setup_trackbars()
@@ -154,9 +158,37 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
         mask2 = cv2.inRange(hsv, low2, high2)
         mask = cv2.bitwise_or(mask1, mask2)
         mask = cv2.bitwise_and(mask, nnmask)
-        mask = cv2.erode(mask, np.ones((3, 3))/9)
-        mask = cv2.dilate(mask, np.ones((7, 7))/9)
+        mask = cv2.erode(mask, np.ones((5, 5))/25)
+        mask = cv2.dilate(mask, np.ones((5, 5))/25)
         result = cv2.bitwise_and(img,img,mask = mask)
+        
+        
+        #mask_grass = cv2.inRange(hsv, low1, high1)
+        mask_grass = cv2.inRange(hsv, low_grass, high_grass)
+        mask_grass = cv2.erode(mask_grass, np.ones((10, 10))/100)
+        mask_grass = cv2.dilate(mask_grass, np.ones((20, 20))/400)
+        
+        
+        cv2.circle(mask_grass, (xcen, ycen), 200, 255, -1)
+        img2, con, hier = cv2.findContours(mask_grass, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        grass = np.ones((img.shape[0], img.shape[1]), np.uint8)*255
+        
+        if len(con) > 0:
+            max_size = -10
+            i_max_size = 0
+            for i in range (len(con)):
+                cnt = con[i]
+                area = cv2.contourArea(cnt)  
+                if area > max_size:
+                    max_size = area
+                    i_max_size = i
+            hull = cv2.convexHull(con[i_max_size])
+            grass = cv2.bitwise_not(grass)
+            cv2.drawContours(grass, [hull], 0, 255, -1)
+            
+                  
+            
+        
         
         if recnum.value >0.5:
             wrote = False
@@ -167,8 +199,24 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
 
         if not wrote:
             cv2.imwrite('nnmask.png', nnmask)
-
+            
+        mask = cv2.bitwise_and(mask, grass)
         img2, con, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        shifted = False
+        if len(con) == 0:
+            mask3 = cv2.inRange(hsv, low3, high3)
+            mask3 = cv2.erode(mask3, np.ones((5, 5))/25)
+            mask3 = cv2.dilate(mask3, np.ones((20, 20))/400)
+            mask3 = cv2.bitwise_and(mask3, grass)
+            mask3 = cv2.bitwise_and(mask3, nnmask)
+
+            
+            mask = cv2.bitwise_or(mask, mask3)
+            #mask = cv2.dilate(mask, np.ones((20, 20))/400)
+            img2, con, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            shifted = True
+            
+        mask = cv2.bitwise_and(mask, mask_grass)
         if len(con) > 0:
             max_size = 0
             i_max_size = 0
@@ -181,10 +229,12 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
                 radius = int(r)
                 if r < 2:
                     continue
+                if shifted and r>30:
+                    continue
                 round_coeff = area/(r*r*3.14)
                 if round_coeff < 0.30:
                     continue
-                result = cv2.circle(result,center,radius,(0,255,0),2)
+                #result = cv2.drawCircle(result,center,radius,(0,255,0),2)
                 
                 
                 #area_coeff = area/500 if area<500 else 1
@@ -204,18 +254,32 @@ def detect_the_ball(anglenum, dist, sizenum, recnum, erasenum, debug):
                 ball_ret_size = ball_size
                 _,r = cv2.minEnclosingCircle(cnt)
                 distance = dist_from_size(r)
+                
+           
             
             
 
-        if debug:
-
+        if debug == 2:
+            proc_grass = cv2.bitwise_and(img,img,mask = grass)
             read_trackbars(low1, high1, low2, high2)
             cv2.imshow('nnmask', nnmask)
             cv2.imshow('img', img)
             cv2.imshow('mask', mask)
             cv2.imshow('proc', result)
+            cv2.imshow('grass', grass)
+            cv2.imshow('mgrass', mask_grass)
+            cv2.imshow('proc grass', proc_grass)
+            cv2.imshow("mask3", mask3)
             print(time.time() - t2, angle, distance, end = '\r')
             t2 = time.time()
+            
+        if debug == 1:
+            proc_grass = cv2.bitwise_and(img,img,mask = grass)
+            read_trackbars(low1, high1, low2, high2)
+            cv2.imshow('img', img)
+            cv2.imshow('mask', mask)
+            print(time.time() - t2, angle, distance, end = '\r')
+            t2 = time.time()            
 
         angle = math.degrees(math.atan2(yball-ycen, xball-xcen))
         if angle < 0:
