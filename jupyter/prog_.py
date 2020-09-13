@@ -11,20 +11,26 @@ from robocup import localization as loc
 from multiprocessing import Process, Value
 #from filterpy.common import Q_discrete_white_noise
 
-
+# kut zero kuta lidara u odnosu na zero kut robota, potrebno da kad ocita lidarom
+# da moze ispravit
 robot_angle = 225
 
+# neke varijable koje se šalju razlicitim procesima i koje onda se mogu 
+# koristit u glavnom programu 
 xnum = Value('d', 0.0)
 ynum = Value('d', 0.0)
 anglenum = Value('d', 0.0)
 distnum = Value('d', 0.0)
 sizenum = Value('d', 0.0)
+
+# paljenje procesa za lokalizaciju i vid
 p1 = Process(target=loc.localize, args=(robot_angle, xnum, ynum, False))
 p2 = Process(target=vision.detect_the_ball, args=(anglenum, distnum, sizenum, False))
 p1.start()
 p2.start()
 
 
+# program za napadaca
 def attacker():
     if seeball > 2:
         robot_speed = 0.3
