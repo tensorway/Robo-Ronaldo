@@ -343,7 +343,7 @@ def debug_get_pos(f, f2, f3):
     #cv2.imshow("f2", f2)
     #cv2.imshow("f3", f3)
     
-def localize(robot_angle, x, y, debug):
+def localize(robot_angle, xnum, ynum, debug):
     w = 500
     try:
         lidar
@@ -367,7 +367,7 @@ def localize(robot_angle, x, y, debug):
                 try:
                     for scan in lidar.iter_scans():
                         f, c = make_img_from_scan(scan, robot_angle)
-                        x.value, y.value, f1, f2, f3 = get_pos(f)
+                        xnum.value, ynum.value, f1, f2, f3 = get_pos(f)
                         #print(x.value, y.value)
                         
                         if debug:
