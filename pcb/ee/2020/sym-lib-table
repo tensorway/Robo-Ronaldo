@@ -1,3 +1,0 @@
-(sym_lib_table
-  (lib (name 2020-rescue)(type Legacy)(uri ${KIPRJMOD}/2020-rescue.lib)(options "")(descr ""))
-)
