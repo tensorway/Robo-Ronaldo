@@ -1,5 +1,7 @@
 # 2020
 
+![alt-text](robot_test.gif)
+
 za instalirati u terminalu (<code>Ctrl+Alt+t</code>) uci u zeljeni direktorij i upisati:
 
 <code> git clone https://github.com/tensorway/2020.git </code>
