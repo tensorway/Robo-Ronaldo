@@ -3,7 +3,7 @@
 ![alt-text](robot_test.gif)
 
 A robot designed to participate in RoboCup Junior Soccer Open competition.
-It uses Lidar to posision itself on the field and a rgb camera to search for the ball.
+It uses Lidar to position itself on the field and a rgb camera to search for the ball.
 
 ## to clone
 cd into desired directory and clone it using:
